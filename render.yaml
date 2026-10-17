@@ -1,0 +1,32 @@
+# Render Blueprint - backend Spring Boot (Docker)
+services:
+  - type: web
+    name: retech-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    region: singapore
+    healthCheckPath: /health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PAYOS_CLIENT_ID
+        sync: false
+      - key: PAYOS_API_KEY
+        sync: false
+      - key: PAYOS_CHECKSUM_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

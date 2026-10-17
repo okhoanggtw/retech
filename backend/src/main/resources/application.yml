@@ -1,0 +1,71 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: retech-backend
+  config:
+    # doc them bien moi truong tu file backend/.env (GEMINI_API_KEY, PAYOS_*...)
+    import: optional:file:.env[.properties]
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/retech}
+      auto-index-creation: true
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 20MB
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: Asia/Ho_Chi_Minh
+
+app:
+  # true = chay MongoDB gia lap trong RAM (khong can cai MongoDB, du lieu mat khi tat)
+  embedded-mongo: false
+  seed-data: ${SEED_DATA:true}
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  backend-url: ${BACKEND_URL:http://localhost:8080}
+  cors-origins: ${CORS_ORIGINS:http://localhost:3000}
+  jwt:
+    secret: ${JWT_SECRET:retech-dev-secret-key-change-me-please-0123456789abcdef}
+    expiration-hours: ${JWT_EXPIRATION_HOURS:72}
+  admin:
+    email: ${ADMIN_EMAIL:admin@retech.vn}
+    password: ${ADMIN_PASSWORD:Admin@123}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-flash-latest,gemini-3.5-flash,gemini-flash-lite-latest}
+    base-url: https://generativelanguage.googleapis.com/v1beta
+  payos:
+    client-id: ${PAYOS_CLIENT_ID:}
+    api-key: ${PAYOS_API_KEY:}
+    checksum-key: ${PAYOS_CHECKSUM_KEY:}
+    base-url: https://api-merchant.payos.vn
+
+logging:
+  file:
+    name: logs/retech.log
+  level:
+    com.retech: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  data:
+    mongodb:
+      database: retech
+app:
+  embedded-mongo: ${EMBEDDED_MONGO:true}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+app:
+  embedded-mongo: false

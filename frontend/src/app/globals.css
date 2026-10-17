@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html { -webkit-font-smoothing: antialiased; }
+body { background: #F5F5F7; color: #1D1D1F; font-feature-settings: "ss01"; }
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cobalt px-6 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-cobalt-dark disabled:cursor-not-allowed disabled:bg-mist focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt;
+  }
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-black disabled:bg-mist focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 px-6 py-3 text-[15px] font-semibold text-ink transition-colors hover:border-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt;
+  }
+  .link { @apply text-cobalt hover:underline; }
+  .icon-btn {
+    @apply grid h-9 w-9 place-items-center rounded-full text-ink/80 transition-colors hover:bg-black/5 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-cobalt;
+  }
+  .menu-item { @apply flex items-center gap-2 rounded-lg px-3 py-2 text-left text-ink hover:bg-paper; }
+  .input {
+    @apply w-full rounded-xl border border-mist bg-white px-4 py-3 text-[15px] outline-none transition-colors placeholder:text-graphite/60 focus:border-cobalt focus:ring-4 focus:ring-cobalt/10;
+  }
+  .card { @apply rounded-xl2 bg-white p-6; }
+  .chip {
+    @apply rounded-full border border-mist bg-white px-4 py-2 text-sm text-ink transition-colors hover:border-ink;
+  }
+  .chip-on { @apply border-ink bg-ink text-white; }
+}
+
+.toast-in { animation: toastIn .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+.chat-pop { animation: chatPop .3s cubic-bezier(.2,.8,.2,1); transform-origin: bottom right; }
+@keyframes chatPop { from { opacity: 0; transform: scale(.94) translateY(8px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

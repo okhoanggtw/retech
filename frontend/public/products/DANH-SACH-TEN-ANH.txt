@@ -1,0 +1,52 @@
+# Đặt ảnh sản phẩm vào thư mục frontend/public/products/
+# Tên file = cột slug + đuôi .png hoặc .jpg hoặc .webp
+# Ví dụ: frontend/public/products/iphone-16-pro-max-256gb-titan-sa-mac.png
+
+
+## Điện thoại
+iphone-16-pro-max-256gb-titan-sa-mac    (iPhone 16 Pro Max – 256GB - Titan Sa Mạc)
+iphone-16-pro-128gb-titan-trang    (iPhone 16 Pro – 128GB - Titan Trắng)
+iphone-15-pro-max-256gb-titan-tu-nhien    (iPhone 15 Pro Max – 256GB - Titan Tự Nhiên)
+iphone-15-128gb-hong    (iPhone 15 – 128GB - Hồng)
+iphone-14-pro-128gb-tim    (iPhone 14 Pro – 128GB - Tím)
+iphone-13-128gb-xanh    (iPhone 13 – 128GB - Xanh)
+samsung-galaxy-s25-ultra-256gb-den-titan    (Samsung Galaxy S25 Ultra – 256GB - Đen Titan)
+samsung-galaxy-s24-256gb-tim    (Samsung Galaxy S24 – 256GB - Tím)
+samsung-galaxy-z-flip6-256gb-xanh-mint    (Samsung Galaxy Z Flip6 – 256GB - Xanh Mint)
+xiaomi-15-512gb-den    (Xiaomi 15 – 512GB - Đen)
+xiaomi-14t-pro-256gb-xam    (Xiaomi 14T Pro – 256GB - Xám)
+xiaomi-redmi-note-14-pro-256gb-tim    (Xiaomi Redmi Note 14 Pro – 256GB - Tím)
+
+## Laptop
+macbook-air-m3-13-inch-8gb-256gb-midnight    (MacBook Air M3 13 inch – 8GB / 256GB - Midnight)
+macbook-air-m2-13-inch-8gb-256gb-starlight    (MacBook Air M2 13 inch – 8GB / 256GB - Starlight)
+macbook-pro-14-m3-pro-18gb-512gb-space-black    (MacBook Pro 14 M3 Pro – 18GB / 512GB - Space Black)
+macbook-pro-16-m1-pro-16gb-512gb-bac    (MacBook Pro 16 M1 Pro – 16GB / 512GB - Bạc)
+samsung-galaxy-book4-pro-14-core-ultra-7-16gb-512gb    (Samsung Galaxy Book4 Pro 14 – Core Ultra 7 / 16GB / 512GB)
+xiaomi-book-pro-14-core-i7-16gb-512gb    (Xiaomi Book Pro 14 – Core i7 / 16GB / 512GB)
+
+## Máy ảnh
+sony-a7-iv-body-8-200-shot    (Sony A7 IV – Body - 8.200 shot)
+sony-zv-e10-kit-16-50mm-3-100-shot    (Sony ZV-E10 – Kit 16-50mm - 3.100 shot)
+sony-a6400-body-12-500-shot    (Sony A6400 – Body - 12.500 shot)
+canon-eos-r6-mark-ii-body-5-600-shot    (Canon EOS R6 Mark II – Body - 5.600 shot)
+canon-eos-r50-kit-18-45mm-2-300-shot    (Canon EOS R50 – Kit 18-45mm - 2.300 shot)
+canon-eos-6d-mark-ii-body-21-000-shot    (Canon EOS 6D Mark II – Body - 21.000 shot)
+
+## Tai nghe
+airpods-pro-2-usb-c-hop-sac-magsafe    (AirPods Pro 2 USB-C – Hộp sạc MagSafe)
+airpods-4-anc-co-chong-on    (AirPods 4 ANC – Có chống ồn)
+sony-wh-1000xm5-den    (Sony WH-1000XM5 – Đen)
+sony-wf-1000xm5-bac    (Sony WF-1000XM5 – Bạc)
+samsung-galaxy-buds3-pro-bac    (Samsung Galaxy Buds3 Pro – Bạc)
+xiaomi-buds-5-pro-xam    (Xiaomi Buds 5 Pro – Xám)
+
+## Đồng hồ
+apple-watch-ultra-2-49mm-titan-day-alpine    (Apple Watch Ultra 2 – 49mm Titan - Dây Alpine)
+apple-watch-series-10-46mm-nhom-den    (Apple Watch Series 10 – 46mm Nhôm - Đen)
+apple-watch-se-2-44mm-bac    (Apple Watch SE 2 – 44mm - Bạc)
+samsung-galaxy-watch7-44mm-xanh    (Samsung Galaxy Watch7 – 44mm - Xanh)
+xiaomi-watch-s4-47mm-den    (Xiaomi Watch S4 – 47mm - Đen)
+
+## Phụ kiện
+khan-lau-microfiber-retech-30x30cm-xam    (Khăn lau Microfiber ReTech – 30x30cm - Xám)

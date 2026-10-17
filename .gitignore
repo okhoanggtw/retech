@@ -1,0 +1,21 @@
+# Java
+backend/target/
+*.class
+*.log
+logs/
+# Env (KHONG dua key len GitHub)
+.env
+.env.local
+!.env.example
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+build.log
