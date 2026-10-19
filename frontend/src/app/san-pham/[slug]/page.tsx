@@ -11,12 +11,13 @@ import { conditionOf, type Product } from "@/lib/types";
 import ProductImage from "@/components/ProductImage";
 import GradeRing from "@/components/GradeRing";
 import ProductCard from "@/components/ProductCard";
+import BuyTogether from "@/components/BuyTogether";
 import { Empty, Skeleton } from "@/components/ui";
 
 const CAT_NAMES: Record<string, string> = { "dien-thoai": "Điện thoại", laptop: "Laptop", "may-anh": "Máy ảnh", "tai-nghe": "Tai nghe", "dong-ho": "Đồng hồ", "phu-kien": "Phụ kiện" };
 
 export default function ProductDetail({ params }: { params: { slug: string } }) {
-  const { data, error } = useSWR<{ product: Product; related: Product[] }>(`/api/products/${params.slug}`, fetcher);
+  const { data, error } = useSWR<{ product: Product; related: Product[]; addOns?: Product[] }>(`/api/products/${params.slug}`, fetcher);
   const { add } = useCart();
   const router = useRouter();
   const [qty, setQty] = useState(1);
@@ -119,6 +120,8 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
           {p.description && <p className="mt-8 leading-relaxed text-graphite">{p.description}</p>}
         </div>
       </section>
+
+      {!!data.addOns?.length && p.stock > 0 && <BuyTogether key={p.id} main={p} addOns={data.addOns} />}
 
       {data.related.length > 0 && (
         <section className="mx-auto max-w-page px-4 pb-20 md:px-6">

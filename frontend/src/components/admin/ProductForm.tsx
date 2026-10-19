@@ -1,10 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Plus, Trash2 } from "lucide-react";
-import { api, ApiError } from "@/lib/api";
+import useSWR from "swr";
+import { Sparkles, Plus, Trash2, X } from "lucide-react";
+import { api, ApiError, fetcher } from "@/lib/api";
 import { vnd } from "@/lib/format";
-import { CONDITIONS, type AiPrice, type Product } from "@/lib/types";
+import { CONDITIONS, type AiPrice, type Page, type Product } from "@/lib/types";
 import { Field, Spinner } from "../ui";
 import { useToast } from "../Toast";
 import ImageUploader from "./ImageUploader";
@@ -27,6 +28,7 @@ export default function ProductForm({ initial }: { initial?: Product }) {
   const [highlights, setHighlights] = useState((initial?.highlights ?? []).join("\n"));
   const [tags, setTags] = useState((initial?.tags ?? []).join(", "));
   const [ai, setAi] = useState<AiPrice | null>(initial?.aiSuggestion ?? null);
+  const [addOnIds, setAddOnIds] = useState<string[]>(initial?.addOnIds ?? []);
   const [err, setErr] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
@@ -51,7 +53,7 @@ export default function ProductForm({ initial }: { initial?: Product }) {
       stock: num(p.stock), warrantyMonths: num(p.warrantyMonths), releaseYear: num(p.releaseYear), images,
       specs: Object.fromEntries(specs.filter(([k, v]) => k.trim() && v.trim())),
       highlights: highlights.split("\n").map((x) => x.trim()).filter(Boolean),
-      tags: tags.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean),
+      tags: tags.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean), addOnIds,
     };
     try {
       await api(initial ? `/api/admin/products/${initial.id}` : "/api/admin/products", { method: initial ? "PUT" : "POST", json: body });
@@ -104,6 +106,7 @@ export default function ProductForm({ initial }: { initial?: Product }) {
           <Field label="Mô tả"><textarea className="input min-h-24" value={p.description} onChange={set("description")} /></Field>
           <Field label="Từ khóa tìm kiếm" hint="Cách nhau dấu phẩy, giúp chatbot tìm đúng (vd: sinh vien, chup anh)"><input className="input" value={tags} onChange={(e) => setTags(e.target.value)} /></Field>
         </section>
+        <AddOnPicker selfId={initial?.id} value={addOnIds} onChange={setAddOnIds} />
       </div>
 
       <aside className="space-y-4 xl:sticky xl:top-20 xl:self-start">
@@ -129,5 +132,49 @@ export default function ProductForm({ initial }: { initial?: Product }) {
         </div>
       </aside>
     </form>
+  );
+}
+
+/** Chọn sản phẩm hiện ở mục "Thường mua kèm". Bỏ trống = hệ thống tự gợi ý theo đơn hàng và danh mục. */
+function AddOnPicker({ selfId, value, onChange }: { selfId?: string; value: string[]; onChange: (v: string[]) => void }) {
+  const { data } = useSWR<Page<Product>>("/api/products?size=60&sort=bestseller", fetcher);
+  const [q, setQ] = useState("");
+  const all = (data?.content ?? []).filter((x) => x.id !== selfId);
+  const byId = new Map(all.map((x) => [x.id, x]));
+  const key = q.trim().toLowerCase();
+  const found = key ? all.filter((x) => !value.includes(x.id) && `${x.name} ${x.variant ?? ""} ${x.brand}`.toLowerCase().includes(key)).slice(0, 6) : [];
+  return (
+    <section className="card space-y-4">
+      <div>
+        <h2 className="font-bold">Sản phẩm mua kèm</h2>
+        <p className="text-sm text-graphite">Hiện ở mục “Thường mua kèm” trên trang sản phẩm (tối đa 4). Bỏ trống thì hệ thống tự gợi ý.</p>
+      </div>
+      {value.length > 0 && (
+        <ul className="flex flex-wrap gap-2">
+          {value.map((id) => (
+            <li key={id} className="chip chip-on inline-flex items-center gap-1.5">
+              {byId.get(id)?.name ?? "Sản phẩm đã ẩn"}
+              <button type="button" onClick={() => onChange(value.filter((x) => x !== id))} aria-label="Bỏ"><X size={14} /></button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {value.length < 4 && (
+        <div>
+          <input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Gõ tên để tìm, vd: khăn lau, AirPods" aria-label="Tìm sản phẩm mua kèm" />
+          {found.length > 0 && (
+            <ul className="mt-2 divide-y divide-mist/70 rounded-xl border border-mist">
+              {found.map((x) => (
+                <li key={x.id}>
+                  <button type="button" onClick={() => { onChange([...value, x.id]); setQ(""); }} className="flex w-full justify-between gap-3 px-4 py-2.5 text-left text-sm hover:bg-paper">
+                    <span>{x.name} <span className="text-graphite">{x.variant}</span></span><span className="tabular-nums">{vnd(x.price)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

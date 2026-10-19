@@ -32,7 +32,8 @@ public final class ProductDtos {
             int releaseYear,
             boolean featured,
             Boolean active,
-            Boolean freeShipping) {}
+            Boolean freeShipping,
+            List<String> addOnIds) {}
 
     public record PageResponse<T>(List<T> content, int page, int size, long totalElements, int totalPages) {}
 

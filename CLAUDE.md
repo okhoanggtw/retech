@@ -51,6 +51,9 @@ backend/   Spring Boot 3.5.6, Java 17, Spring Security + JWT (jjwt 0.12), Spring
 - `PricingService` (định giá): công thức khấu hao (giá mới × 0.92 × retention^năm × hệ số ngoại hình/pin/lỗi/phụ kiện)
   + giá máy tương tự trong kho (trung bình 50/50) -> Gemini tinh chỉnh, **kẹp ±30%** so với công thức.
   Giá thu mua = 68–75% giá bán lại. Không có key/Gemini lỗi -> `source = FORMULA`.
+- "Thường mua kèm" (`ProductService.addOns`, trả trong `GET /api/products/{slug}` field `addOns`, tối đa 4):
+  1) `Product.addOnIds` admin chọn (form SP → "Sản phẩm mua kèm") → 2) SP hay nằm chung đơn (khác danh mục)
+  → 3) danh mục bổ trợ (`COMPLEMENTS`), chỉ lấy món rẻ hơn máy chính. UI: `components/BuyTogether.tsx`.
 - `ChatbotService`: RAG đơn giản – chấm điểm sản phẩm theo từ khóa không dấu + danh mục + khoảng giá ("dưới 10 triệu"),
   đưa top 8 + FAQ + thông tin shop vào prompt. Fallback trả lời theo mẫu khi không có Gemini.
 

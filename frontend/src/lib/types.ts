@@ -22,7 +22,7 @@ export interface Product {
   price: number; originalPrice: number; stock: number; warrantyMonths: number;
   images: string[]; specs: Record<string, string>; highlights: string[];
   description?: string; tags: string[]; releaseYear: number; featured: boolean;
-  active: boolean; freeShipping?: boolean; soldCount: number; viewCount: number; aiSuggestion?: AiPrice;
+  active: boolean; freeShipping?: boolean; addOnIds?: string[]; soldCount: number; viewCount: number; aiSuggestion?: AiPrice;
   createdAt?: string;
 }
 
