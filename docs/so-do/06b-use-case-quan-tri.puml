@@ -1,0 +1,44 @@
+@startuml
+!include _style.iuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #F7F7F7
+title Biểu đồ use case phía quản trị
+
+actor "Quản trị viên" as Admin
+actor "PayOS" as PayOS <<hệ thống>>
+actor "Google Gemini" as Gemini <<hệ thống>>
+
+rectangle "Trang quản trị ReTech" {
+  usecase "Đăng nhập quản trị" as UA0
+  usecase "Quản lý sản phẩm,\ndanh mục" as UA1
+  usecase "Gợi ý giá bán bằng AI" as UA1a
+  usecase "Chọn sản phẩm mua kèm" as UA1b
+  usecase "Xử lý đơn hàng" as UA2
+  usecase "Kiểm tra lại thanh toán" as UA2a
+  usecase "Xử lý yêu cầu thu mua" as UA3
+  usecase "Quản lý người dùng" as UA4
+  usecase "Quản lý banner, menu,\nkhuyến mãi, FAQ" as UA5
+  usecase "Xử lý liên hệ" as UA6
+  usecase "Cài đặt cửa hàng" as UA7
+  usecase "Đăng ký webhook PayOS" as UA7a
+  usecase "Xem thống kê doanh thu" as UA8
+}
+
+Admin --> UA0
+Admin --> UA1
+Admin --> UA2
+Admin --> UA3
+Admin --> UA4
+Admin --> UA5
+Admin --> UA6
+Admin --> UA7
+Admin --> UA8
+UA1 <.. UA1a : <<extend>>
+UA1 <.. UA1b : <<extend>>
+UA2 <.. UA2a : <<extend>>
+UA7 <.. UA7a : <<extend>>
+UA1a --> Gemini
+UA2a --> PayOS
+UA7a --> PayOS
+@enduml

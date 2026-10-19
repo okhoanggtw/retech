@@ -1,0 +1,8 @@
+skinparam defaultFontName "Noto Sans"
+skinparam defaultFontSize 13
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam roundCorner 6
+skinparam ArrowColor black
+skinparam dpi 200

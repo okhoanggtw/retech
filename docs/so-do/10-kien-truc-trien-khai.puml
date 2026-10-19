@@ -1,0 +1,33 @@
+@startuml
+!include _style.iuml
+left to right direction
+skinparam nodesep 30
+skinparam ranksep 90
+title Kiến trúc triển khai hệ thống ReTech
+
+actor "Người dùng\n(trình duyệt)" as U
+node "GitHub\nokhoanggtw/retech\n(nhánh main)" as GH
+
+cloud "Vercel" {
+  node "Frontend\nNext.js 14, React, TypeScript\nretech-frontend.vercel.app" as FE
+}
+cloud "Render (Docker, Singapore)" {
+  node "Backend\nSpring Boot 3.5, Java 17\nController - Service - Repository\nretech-api.onrender.com" as BE
+}
+cloud "MongoDB Atlas (M0)" {
+  database "Database retech\n13 collections + GridFS (ảnh)" as DB
+}
+cloud "Dịch vụ bên ngoài" {
+  node "Google Gemini API\n(định giá, chatbot)" as AI
+  node "PayOS\n(thanh toán VietQR)" as PAY
+}
+
+U --> FE : 1. HTTPS: tải giao diện
+U --> BE : 2. HTTPS REST/JSON + JWT
+BE --> DB : 3. MongoDB driver (TLS)
+BE --> AI : 4. HTTPS
+BE --> PAY : 5. HTTPS: tạo link
+PAY ..> BE : 6. Webhook kết quả
+GH ..> FE : tự build khi push
+GH ..> BE : tự build khi push
+@enduml

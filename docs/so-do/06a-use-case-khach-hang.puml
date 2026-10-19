@@ -1,0 +1,50 @@
+@startuml
+!include _style.iuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecaseBackgroundColor #F7F7F7
+title Biểu đồ use case phía khách hàng
+
+actor "Khách vãng lai" as Guest
+actor "Khách hàng\n(thành viên)" as Member
+Guest <|-- Member
+actor "PayOS" as PayOS <<hệ thống>>
+actor "Google Gemini" as Gemini <<hệ thống>>
+
+rectangle "Hệ thống ReTech" {
+  usecase "Đăng ký" as UC1
+  usecase "Đăng nhập" as UC2
+  usecase "Tìm kiếm, lọc sản phẩm" as UC3
+  usecase "Xem chi tiết sản phẩm" as UC4
+  usecase "Xem gợi ý mua kèm" as UC4b
+  usecase "Định giá máy cũ bằng AI" as UC5
+  usecase "Chat với trợ lý AI" as UC6
+  usecase "Xem FAQ, gửi liên hệ" as UC7
+  usecase "Quản lý giỏ hàng" as UC8
+  usecase "Đặt hàng" as UC9
+  usecase "Áp mã khuyến mãi" as UC9a
+  usecase "Thanh toán QR" as UC10
+  usecase "Theo dõi, hủy đơn" as UC11
+  usecase "Gửi yêu cầu thu mua" as UC12
+  usecase "Cập nhật hồ sơ,\nđổi mật khẩu" as UC13
+}
+
+Guest --> UC1
+Guest --> UC2
+Guest --> UC3
+Guest --> UC4
+Guest --> UC5
+Guest --> UC6
+Guest --> UC7
+Member --> UC8
+Member --> UC9
+Member --> UC11
+Member --> UC12
+Member --> UC13
+UC4 <.. UC4b : <<extend>>
+UC9 <.. UC9a : <<extend>>
+UC9 <.. UC10 : <<extend>>
+UC10 --> PayOS
+UC5 --> Gemini
+UC6 --> Gemini
+@enduml

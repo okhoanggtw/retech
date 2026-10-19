@@ -1,0 +1,22 @@
+@startuml
+!include _style.iuml
+skinparam stateBackgroundColor #F7F7F7
+title Biểu đồ trạng thái đơn hàng
+
+[*] --> PENDING : Khách đặt hàng
+state "Chờ xác nhận\n(PENDING)" as PENDING
+state "Đã xác nhận\n(CONFIRMED)" as CONFIRMED
+state "Đang giao\n(SHIPPING)" as SHIPPING
+state "Hoàn thành\n(COMPLETED)" as COMPLETED
+state "Đã hủy\n(CANCELLED)" as CANCELLED
+
+PENDING --> CONFIRMED : PayOS báo đã thanh toán\nhoặc admin xác nhận (COD)
+CONFIRMED --> SHIPPING : Admin giao cho đơn vị vận chuyển
+SHIPPING --> COMPLETED : Khách nhận hàng\n[COD: tự ghi Đã thanh toán]
+PENDING --> CANCELLED : Khách / admin hủy,\nthanh toán thất bại
+CONFIRMED --> CANCELLED : Admin hủy
+SHIPPING --> CANCELLED : Admin hủy
+CANCELLED : Hoàn lại tồn kho
+COMPLETED --> [*]
+CANCELLED --> [*]
+@enduml

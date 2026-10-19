@@ -1,0 +1,23 @@
+digraph G {
+  graph [rankdir=LR, fontname="Noto Sans", pad=0.3, nodesep=0.9, ranksep=2.2, bgcolor=white, label="Ký hiệu:  ○ tiến trình   ▭ tác nhân ngoài   → luồng dữ liệu", labelloc=b, fontsize=11];
+  node  [fontname="Noto Sans", fontsize=13, color=black, penwidth=1.2];
+  edge  [fontname="Noto Sans", fontsize=10.5, color=black, arrowsize=0.7];
+
+  KH  [shape=box, label="Khách hàng", width=1.8, height=0.7];
+  QTV [shape=box, label="Quản trị viên", width=1.8, height=0.7];
+  PAY [shape=box, label="Cổng thanh toán\nPayOS", width=1.8, height=0.7];
+  AI  [shape=box, label="Google Gemini\n(dịch vụ AI)", width=1.8, height=0.7];
+  S   [shape=circle, label="0\nHệ thống bán\nđồ công nghệ cũ\nReTech", width=2.4, fixedsize=true, style=filled, fillcolor="#F2F2F2"];
+
+  KH -> S [label="Thông tin đăng ký, đăng nhập\nTừ khóa tìm kiếm\nGiỏ hàng, thông tin đặt hàng\nYêu cầu định giá, thu mua\nCâu hỏi tư vấn, liên hệ"];
+  S -> KH [label="Danh sách, chi tiết sản phẩm\nGợi ý mua kèm\nHóa đơn, mã QR thanh toán\nTrạng thái đơn hàng\nGiá định giá, câu trả lời AI"];
+  QTV -> S [label="Thông tin sản phẩm, danh mục\nCập nhật trạng thái đơn\nKết quả xử lý thu mua\nNội dung, khuyến mãi, cài đặt"];
+  S -> QTV [label="Danh sách đơn hàng\nYêu cầu thu mua, liên hệ\nGợi ý giá bán\nBáo cáo thống kê"];
+  S -> PAY [label="Yêu cầu tạo link thanh toán\nĐăng ký webhook"];
+  PAY -> S [label="Link, mã QR thanh toán\nKết quả giao dịch (webhook)"];
+  S -> AI  [label="Thông tin máy cần định giá\nCâu hỏi + dữ liệu sản phẩm"];
+  AI -> S  [label="Giá đề xuất\nCâu trả lời tư vấn"];
+
+  {rank=min; KH; QTV}
+  {rank=max; PAY; AI}
+}

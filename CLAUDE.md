@@ -65,7 +65,8 @@ backend/   Spring Boot 3.5.6, Java 17, Spring Security + JWT (jjwt 0.12), Spring
 - Chưa có key -> **chế độ DEMO** (`/checkout/demo-pay`, nút giả lập chuyển khoản).
 - Lỗi "signature không hợp lệ" từng gặp = checksum key không cùng kênh với client id. Kênh đang dùng là kênh của dự án khác
   (ngao giống) -> khi deploy nên tạo kênh riêng vì mỗi kênh chỉ 1 webhook URL.
-- Thanh toán thất bại: hủy đơn, hoàn kho, **giữ nguyên giỏ hàng**.
+- Thanh toán thất bại / hết hạn (phát hiện khi trang kết quả gọi `syncPayment`; webhook chỉ xử lý giao dịch thành công):
+  hủy đơn, hoàn kho. Giỏ hàng đã bị xóa lúc tạo link thành công và **chưa** được khôi phục.
 
 ## Lỗi đã gặp (đừng lặp lại)
 - Driver Mongo 5.x cần wire version ≥ 8: `EmbeddedMongoConfig` khai báo MongoVersion 4.2 cho mongo-java-server.
@@ -88,6 +89,9 @@ backend/   Spring Boot 3.5.6, Java 17, Spring Security + JWT (jjwt 0.12), Spring
 - Lỗi đã gặp: Render `update_failed` + `SSLException: Received fatal alert: internal_error` tới Atlas
   = IP chưa được phép -> thêm `0.0.0.0/0` (không tick "temporary") ở Atlas IP Access List.
 - `NEXT_PUBLIC_API_URL` gắn cứng lúc build -> đổi link Render thì phải Redeploy Vercel.
+
+## Tài liệu
+- Sơ đồ báo cáo (BFD, DFD, use case, ERD, sequence, state, triển khai): `docs/so-do/` (README liệt kê từng hình).
 
 ## Việc còn lại
 1. Đăng ký webhook PayOS (kênh hiện tại dùng chung với dự án ngao giống -> đăng ký sẽ ghi đè; nên tạo kênh riêng),
