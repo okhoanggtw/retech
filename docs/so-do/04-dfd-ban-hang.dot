@@ -1,0 +1,76 @@
+digraph G {
+  graph [rankdir=LR, fontname="Noto Sans", pad=0.3, nodesep=0.18, ranksep=1.6, bgcolor=white, newrank=true,
+         label="Ký hiệu:  ○ tiến trình   ▭ tác nhân ngoài   ═ kho dữ liệu   → luồng dữ liệu.   Tác nhân / kho xuất hiện nhiều lần là cùng một đối tượng, vẽ lặp lại cho dễ đọc.", labelloc=b, fontsize=11];
+  node  [fontname="Noto Sans", fontsize=12, color=black, penwidth=1.2];
+  edge  [fontname="Noto Sans", fontsize=9.5, color=black, arrowsize=0.65];
+
+  P0 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.1\nQuản lý\ngiỏ hàng"];
+  E0_0 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E0_0 -> P0 [label="Thêm / sửa / xóa SP"];
+  E0_0 -> P0 [label="Giỏ hàng, tạm tính", dir=back];
+  S0_1 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D2</b></td><td sides="tb" width="130">Sản phẩm, danh mục</td></tr></table>>];
+  P0 -> S0_1 [label="Giá, tồn kho", dir=back];
+  S0_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D3</b></td><td sides="tb" width="130">Giỏ hàng</td></tr></table>>];
+  P0 -> S0_2 [label="Giỏ hàng"];
+  P0 -> S0_2 [label="Giỏ hàng", dir=back];
+  P1 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.2\nTính tiền,\náp mã KM"];
+  E1_0 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E1_0 -> P1 [label="Mã khuyến mãi"];
+  E1_0 -> P1 [label="Giảm giá, phí ship, tổng", dir=back];
+  S1_1 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D3</b></td><td sides="tb" width="130">Giỏ hàng</td></tr></table>>];
+  P1 -> S1_1 [label="Giỏ hàng", dir=back];
+  S1_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D5</b></td><td sides="tb" width="130">Khuyến mãi</td></tr></table>>];
+  P1 -> S1_2 [label="Điều kiện mã KM", dir=back];
+  P2 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.3\nTạo\nđơn hàng"];
+  E2_0 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E2_0 -> P2 [label="Người nhận, địa chỉ, cách TT"];
+  E2_0 -> P2 [label="Mã đơn hàng", dir=back];
+  S2_1 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D2</b></td><td sides="tb" width="130">Sản phẩm, danh mục</td></tr></table>>];
+  P2 -> S2_1 [label="Trừ tồn kho"];
+  S2_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D5</b></td><td sides="tb" width="130">Khuyến mãi</td></tr></table>>];
+  P2 -> S2_2 [label="Tăng lượt dùng"];
+  S2_3 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D4</b></td><td sides="tb" width="130">Đơn hàng</td></tr></table>>];
+  P2 -> S2_3 [label="Đơn hàng mới"];
+  S2_4 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D3</b></td><td sides="tb" width="130">Giỏ hàng</td></tr></table>>];
+  P2 -> S2_4 [label="Xóa giỏ hàng"];
+  P3 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.4\nThanh toán\nQR PayOS"];
+  E3_0 [shape=box, width=1.6, height=0.55, label="PayOS"];
+  E3_0 -> P3 [label="Mã đơn, số tiền, chữ ký", dir=back];
+  E3_0 -> P3 [label="Link, mã QR"];
+  E3_1 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E3_1 -> P3 [label="Mã QR thanh toán", dir=back];
+  S3_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D4</b></td><td sides="tb" width="130">Đơn hàng</td></tr></table>>];
+  P3 -> S3_2 [label="Đơn hàng", dir=back];
+  P3 -> S3_2 [label="Link thanh toán"];
+  P4 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.5\nXác nhận\nthanh toán"];
+  E4_0 [shape=box, width=1.6, height=0.55, label="PayOS"];
+  E4_0 -> P4 [label="Webhook kết quả GD"];
+  E4_1 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E4_1 -> P4 [label="Kết quả thanh toán", dir=back];
+  S4_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D4</b></td><td sides="tb" width="130">Đơn hàng</td></tr></table>>];
+  P4 -> S4_2 [label="Đã thanh toán / hủy"];
+  S4_3 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D2</b></td><td sides="tb" width="130">Sản phẩm, danh mục</td></tr></table>>];
+  P4 -> S4_3 [label="Hoàn kho nếu thất bại"];
+  P5 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.6\nXử lý\nđơn hàng"];
+  E5_0 [shape=box, width=1.6, height=0.55, label="Quản trị viên"];
+  E5_0 -> P5 [label="Trạng thái mới"];
+  E5_0 -> P5 [label="Chi tiết đơn", dir=back];
+  E5_1 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E5_1 -> P5 [label="Trạng thái đơn", dir=back];
+  S5_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D4</b></td><td sides="tb" width="130">Đơn hàng</td></tr></table>>];
+  P5 -> S5_2 [label="Đơn hàng", dir=back];
+  P5 -> S5_2 [label="Trạng thái, lịch sử"];
+  P6 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="3.7\nHủy đơn,\nhoàn kho"];
+  E6_0 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E6_0 -> P6 [label="Yêu cầu hủy"];
+  E6_1 [shape=box, width=1.6, height=0.55, label="Quản trị viên"];
+  E6_1 -> P6 [label="Hủy đơn"];
+  S6_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D4</b></td><td sides="tb" width="130">Đơn hàng</td></tr></table>>];
+  P6 -> S6_2 [label="Đã hủy"];
+  S6_3 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D2</b></td><td sides="tb" width="130">Sản phẩm, danh mục</td></tr></table>>];
+  P6 -> S6_3 [label="Cộng lại tồn kho"];
+  {rank=same; E0_0; E1_0; E2_0; E3_0; E3_1; E4_0; E4_1; E5_0; E5_1; E6_0; E6_1}
+  {rank=same; P0; P1; P2; P3; P4; P5; P6}
+  {rank=same; S0_1; S0_2; S1_1; S1_2; S2_1; S2_2; S2_3; S2_4; S3_2; S4_2; S4_3; S5_2; S6_2; S6_3}
+  P0 -> P1 -> P2 -> P3 -> P4 -> P5 -> P6 [style=invis];
+}

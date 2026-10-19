@@ -1,0 +1,35 @@
+digraph G {
+  graph [rankdir=LR, fontname="Noto Sans", pad=0.3, nodesep=0.18, ranksep=1.6, bgcolor=white, newrank=true,
+         label="Ký hiệu:  ○ tiến trình   ▭ tác nhân ngoài   ═ kho dữ liệu   → luồng dữ liệu.   Tác nhân / kho xuất hiện nhiều lần là cùng một đối tượng, vẽ lặp lại cho dễ đọc.", labelloc=b, fontsize=11];
+  node  [fontname="Noto Sans", fontsize=12, color=black, penwidth=1.2];
+  edge  [fontname="Noto Sans", fontsize=9.5, color=black, arrowsize=0.65];
+
+  P0 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="4.1\nĐịnh giá\nmáy cũ"];
+  E0_0 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E0_0 -> P0 [label="Model, năm mua, tình trạng, pin"];
+  E0_0 -> P0 [label="Giá bán lại, giá thu mua", dir=back];
+  E0_1 [shape=box, width=1.6, height=0.55, label="Google Gemini"];
+  E0_1 -> P0 [label="Thông tin máy + giá công thức", dir=back];
+  E0_1 -> P0 [label="Giá tinh chỉnh"];
+  S0_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D2</b></td><td sides="tb" width="130">Sản phẩm, danh mục</td></tr></table>>];
+  P0 -> S0_2 [label="Giá máy tương tự, hệ số khấu hao", dir=back];
+  P1 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="4.2\nGửi yêu cầu\nthu mua"];
+  E1_0 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E1_0 -> P1 [label="Thông tin máy, ảnh, liên hệ"];
+  E1_0 -> P1 [label="Xác nhận đã gửi", dir=back];
+  S1_1 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D6</b></td><td sides="tb" width="130">Yêu cầu thu mua</td></tr></table>>];
+  P1 -> S1_1 [label="Yêu cầu (NEW)"];
+  P2 [shape=circle, fixedsize=true, width=1.55, style=filled, fillcolor="#F2F2F2", label="4.3\nXử lý yêu cầu\nthu mua"];
+  E2_0 [shape=box, width=1.6, height=0.55, label="Quản trị viên"];
+  E2_0 -> P2 [label="Giá thu, ghi chú, trạng thái"];
+  E2_0 -> P2 [label="Danh sách yêu cầu", dir=back];
+  E2_1 [shape=box, width=1.6, height=0.55, label="Khách hàng"];
+  E2_1 -> P2 [label="Trạng thái yêu cầu", dir=back];
+  S2_2 [shape=plain, label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="5"><tr><td sides="r"><b>D6</b></td><td sides="tb" width="130">Yêu cầu thu mua</td></tr></table>>];
+  P2 -> S2_2 [label="Yêu cầu", dir=back];
+  P2 -> S2_2 [label="Cập nhật trạng thái"];
+  {rank=same; E0_0; E0_1; E1_0; E2_0; E2_1}
+  {rank=same; P0; P1; P2}
+  {rank=same; S0_2; S1_1; S2_2}
+  P0 -> P1 -> P2 [style=invis];
+}

@@ -1,0 +1,56 @@
+@startuml
+!include _style.iuml
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 12
+autonumber "<b>0."
+title Biểu đồ tuần tự: Đặt hàng và thanh toán QR PayOS
+
+actor "Khách hàng" as KH
+participant "Web (Next.js)\nVercel" as FE
+participant "API (Spring Boot)\nRender" as BE
+database "MongoDB Atlas" as DB
+participant "PayOS" as PAY
+
+KH -> FE : Bấm "Đặt hàng"\n(địa chỉ, mã KM, chọn QR)
+FE -> BE : POST /api/orders\n(Bearer JWT)
+activate BE
+BE -> DB : Đọc giỏ hàng, sản phẩm, mã KM
+BE -> BE : Kiểm tra tồn kho,\ntính giảm giá, phí ship, tổng
+BE -> DB : Lưu đơn (PENDING, UNPAID), trừ tồn kho
+BE -> PAY : POST /v2/payment-requests\n(orderCode, amount, chữ ký HMAC-SHA256)
+alt Tạo link thành công
+  PAY --> BE : checkoutUrl, qrCode
+  BE -> DB : Lưu link vào đơn, tăng lượt dùng mã KM, xóa giỏ
+  BE --> FE : Đơn hàng + mã QR
+  FE --> KH : Hiện mã QR (VietQR)
+else Lỗi
+  BE -> DB : Hủy đơn, hoàn tồn kho
+  BE --> FE : Báo lỗi, gợi ý chọn COD
+end
+deactivate BE
+
+KH -> PAY : Quét QR, chuyển khoản bằng app ngân hàng
+PAY -> BE : POST /api/payments/payos/webhook\n(kết quả giao dịch + chữ ký)
+activate BE
+BE -> BE : Xác minh chữ ký (HMAC-SHA256)
+opt Chữ ký hợp lệ và giao dịch thành công (code = 00)
+  BE -> DB : paymentStatus = PAID, status = CONFIRMED\nlưu mã giao dịch, lịch sử
+end
+BE --> PAY : 200 OK
+deactivate BE
+
+PAY --> KH : Chuyển về trang kết quả (returnUrl / cancelUrl)
+KH -> FE : Mở /checkout/result
+FE -> BE : GET /api/payments/payos/{orderCode}/status
+activate BE
+BE -> PAY : GET /v2/payment-requests/{orderCode}\n(đồng bộ phòng khi lỡ webhook)
+PAY --> BE : PAID | PENDING | CANCELLED | EXPIRED
+alt PAID mà đơn chưa ghi nhận
+  BE -> DB : Ghi nhận đã thanh toán
+else CANCELLED / EXPIRED
+  BE -> DB : Hủy đơn, hoàn tồn kho
+end
+BE --> FE : Trạng thái đơn
+deactivate BE
+FE --> KH : Thông báo kết quả thanh toán
+@enduml

@@ -1,0 +1,51 @@
+@startwbs
+<style>
+wbsDiagram {
+  FontName "Noto Sans"
+  FontSize 13
+  LineColor black
+  BackgroundColor white
+  RoundCorner 0
+  Padding 6
+  node { BackgroundColor white; LineColor black; LineThickness 1 }
+  :depth(0) { FontStyle bold; FontSize 15; BackgroundColor #E8E8E8 }
+  :depth(1) { FontStyle bold; BackgroundColor #F2F2F2 }
+}
+</style>
+* Hệ thống bán đồ công nghệ cũ ReTech
+** 1. Quản lý tài khoản
+*** 1.1 Đăng ký
+*** 1.2 Đăng nhập
+*** 1.3 Cập nhật thông tin cá nhân
+*** 1.4 Đổi mật khẩu
+*** 1.5 Quản lý người dùng
+** 2. Quản lý sản phẩm
+*** 2.1 Quản lý danh mục
+*** 2.2 Thêm, sửa, xóa sản phẩm
+*** 2.3 Gợi ý giá bán bằng AI
+*** 2.4 Thiết lập sản phẩm mua kèm
+*** 2.5 Tìm kiếm, lọc sản phẩm
+*** 2.6 Xem chi tiết sản phẩm
+** 3. Quản lý bán hàng
+*** 3.1 Quản lý giỏ hàng
+*** 3.2 Áp dụng mã khuyến mãi
+*** 3.3 Đặt hàng
+*** 3.4 Thanh toán COD / QR PayOS
+*** 3.5 Theo dõi, hủy đơn hàng
+*** 3.6 Xử lý đơn hàng
+** 4. Thu mua máy cũ
+*** 4.1 Định giá máy cũ bằng AI
+*** 4.2 Gửi yêu cầu thu mua
+*** 4.3 Xử lý yêu cầu thu mua
+** 5. Hỗ trợ khách hàng
+*** 5.1 Trợ lý AI tư vấn
+*** 5.2 Hỏi đáp (FAQ)
+*** 5.3 Gửi liên hệ
+*** 5.4 Xử lý liên hệ
+** 6. Quản trị nội dung, báo cáo
+*** 6.1 Quản lý banner, menu
+*** 6.2 Quản lý khuyến mãi
+*** 6.3 Quản lý FAQ
+*** 6.4 Cài đặt cửa hàng
+*** 6.5 Thống kê doanh thu
+@endwbs

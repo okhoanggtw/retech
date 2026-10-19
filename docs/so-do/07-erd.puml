@@ -1,0 +1,161 @@
+@startuml
+!include _style.iuml
+hide circle
+hide methods
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+skinparam classBackgroundColor white
+skinparam classHeaderBackgroundColor #EDEDED
+skinparam classFontSize 12
+skinparam classAttributeFontSize 11
+
+title Thiết kế CSDL MongoDB (database "retech")\n<size:11>PK = khóa chính _id;  FK = tham chiếu bằng id/slug;  [nhúng] = tài liệu con lưu ngay trong bản ghi cha (embedded)</size>
+
+class "users" as users {
+  <b>_id</b> : ObjectId <<PK>>
+  fullName : String
+  email : String <<unique>>
+  passwordHash : String (BCrypt)
+  phone, address, avatar : String
+  role : USER | ADMIN
+  enabled : Boolean
+  createdAt : Date
+}
+class "categories" as categories {
+  <b>_id</b> : ObjectId <<PK>>
+  name : String
+  slug : String <<unique>>
+  icon, description : String
+  yearlyRetention : Double
+  sortOrder : Int
+}
+class "products" as products {
+  <b>_id</b> : ObjectId <<PK>>
+  name, model, variant : String
+  slug : String <<unique>>
+  category : String <<FK categories.slug>>
+  brand : String
+  condition : LIKE_NEW|EXCELLENT|GOOD|FAIR|WORN
+  batteryHealth : Int
+  price, originalPrice : Long
+  stock, warrantyMonths, releaseYear : Int
+  images, highlights, tags : String[]
+  specs : Map<String,String>
+  addOnIds : ObjectId[] <<FK products>>
+  featured, freeShipping, active : Boolean
+  soldCount, viewCount : Int
+  aiSuggestion : AiPriceSuggestion [nhúng]
+  createdAt, updatedAt : Date
+}
+class "carts" as carts {
+  <b>_id</b> : ObjectId <<PK>>
+  userId : ObjectId <<FK users, unique>>
+  items : { productId, quantity }[] [nhúng]
+}
+class "orders" as orders {
+  <b>_id</b> : ObjectId <<PK>>
+  orderCode : Long <<unique>>
+  userId : ObjectId <<FK users>>
+  items : OrderItem[] [nhúng]
+  subtotal, discount, shippingFee, total : Long
+  promotionCode : String <<FK promotions.code>>
+  shipping : {fullName, phone, email, address, note} [nhúng]
+  paymentMethod : COD | PAYOS
+  paymentStatus : UNPAID|PAID|CANCELLED|REFUNDED
+  status : PENDING|CONFIRMED|SHIPPING|COMPLETED|CANCELLED
+  paymentLinkId, checkoutUrl, qrCode : String
+  paymentReference : String
+  paidAt : Date
+  history : {status, note, at}[] [nhúng]
+  createdAt, updatedAt : Date
+}
+class "OrderItem" as oi <<embedded>> {
+  productId : ObjectId <<FK products>>
+  name, slug, image : String
+  category, brand, condition : String
+  price : Long
+  quantity : Int
+}
+class "promotions" as promotions {
+  <b>_id</b> : ObjectId <<PK>>
+  code : String <<unique>>
+  name, description : String
+  type : PERCENT | FIXED
+  value, maxDiscount, minOrderValue : Long
+  startAt, endAt : Date
+  usageLimit, usedCount : Int
+  active : Boolean
+}
+class "trade_ins" as trade_ins {
+  <b>_id</b> : ObjectId <<PK>>
+  userId : ObjectId <<FK users, có thể rỗng>>
+  category, brand, model, storage : String
+  purchaseYear, batteryHealth : Int
+  condition : ConditionGrade
+  issues, accessories, images : String[]
+  referenceNewPrice, offerPrice : Long
+  contactName, contactPhone, contactEmail : String
+  aiEstimate : AiPriceSuggestion [nhúng]
+  status : NEW|CONTACTED|ACCEPTED|REJECTED|COMPLETED
+  note, adminNote : String
+  createdAt : Date
+}
+class "chat_logs" as chat_logs {
+  <b>_id</b> : ObjectId <<PK>>
+  sessionId : String
+  userId : ObjectId <<FK users, có thể rỗng>>
+  question, answer : String
+  productIds : ObjectId[] <<FK products>>
+  source : GEMINI | FALLBACK
+  createdAt : Date
+}
+class "contacts" as contacts {
+  <b>_id</b> : ObjectId <<PK>>
+  fullName, email, phone : String
+  subject, message : String
+  handled : Boolean
+  createdAt : Date
+}
+class "AiPriceSuggestion" as ai <<embedded>> {
+  suggestedPrice, minPrice, maxPrice : Long
+  buyPriceLow, buyPriceHigh : Long
+  confidence : Double
+  factors : {name, impact, note}[] [nhúng]
+  source : GEMINI | FORMULA
+  explanation : String
+  createdAt : Date
+}
+package "Nội dung website (không quan hệ)" {
+  class "banners" as banners {
+    _id, title, subtitle, image
+    ctaText, link, theme
+    sortOrder, active
+  }
+  class "menus" as menus {
+    _id, label, href, position
+    groupName, sortOrder, active
+  }
+  class "faqs" as faqs {
+    _id, question, answer
+    topic, sortOrder
+  }
+  class "settings" as settings {
+    _id, storeName, slogan, hotline
+    email, address, workingHours, ...
+  }
+}
+
+users "1" -- "0..1" carts
+users "1" -- "0..*" orders
+users "0..1" -- "0..*" trade_ins
+users "0..1" -- "0..*" chat_logs
+categories "1" -- "0..*" products
+orders *-- "1..*" oi
+oi "0..*" -- "1" products
+carts "0..*" -- "0..*" products : items.productId
+promotions "0..1" -- "0..*" orders : promotionCode
+products "0..*" -- "0..*" products : addOnIds\n(mua kèm)
+products *-- "0..1" ai
+trade_ins *-- "0..1" ai
+@enduml
