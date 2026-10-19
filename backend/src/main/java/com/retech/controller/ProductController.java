@@ -45,7 +45,7 @@ public class ProductController {
     @GetMapping("/products/{slug}")
     public Map<String, Object> detail(@PathVariable String slug) {
         Product p = productService.viewBySlug(slug);
-        return Map.of("product", p, "related", productService.related(p, 8));
+        return Map.of("product", p, "related", productService.related(p, 8), "addOns", productService.addOns(p, 4));
     }
 
     @GetMapping("/categories")

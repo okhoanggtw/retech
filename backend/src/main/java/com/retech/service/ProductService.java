@@ -3,6 +3,8 @@ package com.retech.service;
 import com.retech.dto.ProductDtos.*;
 import com.retech.exception.ApiException;
 import com.retech.model.ConditionGrade;
+import com.retech.model.Order;
+import com.retech.model.OrderStatus;
 import com.retech.model.Product;
 import com.retech.repository.ProductRepository;
 import com.retech.util.TextUtil;
@@ -86,6 +88,58 @@ public class ProductService {
         return list.stream().limit(limit).toList();
     }
 
+    /** Danh muc hay mua kem voi tung danh muc (dung khi chua co du du lieu don hang) */
+    private static final Map<String, List<String>> COMPLEMENTS = Map.of(
+            "dien-thoai", List.of("phu-kien", "tai-nghe", "dong-ho"),
+            "laptop", List.of("phu-kien", "tai-nghe"),
+            "may-anh", List.of("phu-kien"),
+            "tai-nghe", List.of("phu-kien", "dien-thoai"),
+            "dong-ho", List.of("phu-kien", "dien-thoai"),
+            "phu-kien", List.of());
+
+    /**
+     * Goi y "Thuong mua kem": 1) admin chon -> 2) hay xuat hien chung don hang -> 3) danh muc bo tro.
+     * Chi lay san pham khac danh muc, dang ban, con hang.
+     */
+    public List<Product> addOns(Product p, int limit) {
+        Map<String, Product> out = new LinkedHashMap<>();
+        java.util.function.Predicate<Product> ok = x -> x.isActive() && x.getStock() > 0
+                && !x.getId().equals(p.getId()) && !out.containsKey(x.getId());
+
+        if (p.getAddOnIds() != null) repo.findAllById(p.getAddOnIds()).forEach(x -> { if (ok.test(x)) out.put(x.getId(), x); });
+
+        if (out.size() < limit) {
+            Query q = new Query(Criteria.where("items.productId").is(p.getId()).and("status").ne(OrderStatus.CANCELLED)).limit(300);
+            Map<String, Integer> together = new HashMap<>();
+            for (Order o : mongo.find(q, Order.class))
+                for (Order.Item i : o.getItems())
+                    if (!i.getProductId().equals(p.getId())) together.merge(i.getProductId(), 1, Integer::sum);
+            Map<String, Product> byId = new HashMap<>();
+            repo.findAllById(together.keySet()).forEach(x -> byId.put(x.getId(), x));
+            together.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                    .map(e -> byId.get(e.getKey()))
+                    .filter(x -> x != null && !x.getCategory().equals(p.getCategory()) && ok.test(x))
+                    .limit(limit - out.size()).forEach(x -> out.put(x.getId(), x));
+        }
+
+        if (out.size() < limit) {
+            // chi lay mon re hon may chinh (do "di kem"); moi danh muc mot hang doi (cung hang, ban chay len truoc), lay xen ke
+            Comparator<Product> rank = Comparator.<Product>comparingInt(x -> x.getBrand().equalsIgnoreCase(p.getBrand()) || "ReTech".equals(x.getBrand()) ? 0 : 1)
+                    .thenComparing(Comparator.comparingInt(Product::getSoldCount).reversed());
+            List<Deque<Product>> queues = new ArrayList<>();
+            for (String cat : COMPLEMENTS.getOrDefault(p.getCategory(), List.of()))
+                queues.add(new ArrayDeque<>(repo.findByCategoryAndActiveTrue(cat).stream()
+                        .filter(x -> x.getPrice() <= p.getPrice()).sorted(rank).toList()));
+            while (out.size() < limit && queues.stream().anyMatch(qq -> !qq.isEmpty()))
+                for (Deque<Product> qq : queues) {
+                    while (!qq.isEmpty() && !ok.test(qq.peek())) qq.poll();
+                    Product x = qq.poll();
+                    if (x != null && out.size() < limit) out.put(x.getId(), x);
+                }
+        }
+        return new ArrayList<>(out.values());
+    }
+
     public List<Product> featured() {
         return repo.findByActiveTrueAndFeaturedTrue();
     }
@@ -149,6 +203,7 @@ public class ProductService {
         p.setFeatured(r.featured());
         if (r.active() != null) p.setActive(r.active());
         if (r.freeShipping() != null) p.setFreeShipping(r.freeShipping());
+        if (r.addOnIds() != null) p.setAddOnIds(r.addOnIds().stream().distinct().filter(id -> !id.equals(p.getId())).toList());
     }
 
     private String uniqueSlug(String base, String selfId) {

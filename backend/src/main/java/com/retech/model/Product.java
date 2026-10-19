@@ -45,6 +45,9 @@ public class Product {
     private String description;
     @Builder.Default
     private List<String> tags = new ArrayList<>();
+    /** San pham di kem do admin chon (id), hien o muc "Thuong mua kem" */
+    @Builder.Default
+    private List<String> addOnIds = new ArrayList<>();
     private int releaseYear;
     private boolean featured;
     /** Mien phi giao hang (vd san pham test 2.000d) */
