@@ -38,6 +38,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         ensureAdmin();
+        ensurePromotions();
         if (!props.isSeedData() || productRepo.count() > 0) return;
         log.info("==> Dang tao du lieu mau...");
         seedSettings();
@@ -57,6 +58,31 @@ public class DataSeeder implements CommandLineRunner {
         userRepo.save(User.builder().fullName("Quản trị viên").email(email)
                 .passwordHash(encoder.encode(props.getAdmin().getPassword())).role(Role.ADMIN).build());
         log.info("==> Tao tai khoan admin: {}", email);
+    }
+
+    private void ensurePromotions() {
+        Instant now = Instant.now();
+        promotionRepo.findByCodeIgnoreCase("SINHVIEN").ifPresentOrElse(p -> {
+            p.setStudentOnly(true);
+            p.setApplicableCategories(new ArrayList<>(List.of("laptop")));
+            p.setDescription("Giảm 5% cho sinh viên (áp dụng Laptop / MacBook, tối đa 1 triệu)");
+            promotionRepo.save(p);
+        }, () -> {
+            promotionRepo.save(Promotion.builder().code("SINHVIEN").name("Ưu đãi sinh viên 5%")
+                    .description("Giảm 5% cho sinh viên (áp dụng Laptop / MacBook, tối đa 1 triệu)")
+                    .type(Promotion.Type.PERCENT).value(5).maxDiscount(1_000_000).minOrderValue(5_000_000)
+                    .studentOnly(true)
+                    .applicableCategories(new ArrayList<>(List.of("laptop")))
+                    .startAt(now.minus(30, ChronoUnit.DAYS)).endAt(now.plus(120, ChronoUnit.DAYS)).build());
+        });
+
+        if (promotionRepo.findByCodeIgnoreCase("IPHONE10").isEmpty()) {
+            promotionRepo.save(Promotion.builder().code("IPHONE10").name("Giảm 10% dòng Điện thoại")
+                    .description("Giảm 10% tối đa 1 triệu cho các mẫu điện thoại")
+                    .type(Promotion.Type.PERCENT).value(10).maxDiscount(1_000_000).minOrderValue(5_000_000)
+                    .applicableCategories(new ArrayList<>(List.of("dien-thoai")))
+                    .startAt(now.minus(10, ChronoUnit.DAYS)).endAt(now.plus(60, ChronoUnit.DAYS)).build());
+        }
     }
 
     private void seedSettings() {
@@ -272,9 +298,15 @@ public class DataSeeder implements CommandLineRunner {
                 Promotion.builder().code("RETECH10").name("Giảm 10% đơn đầu tiên").description("Tối đa 500.000đ cho đơn từ 3 triệu")
                         .type(Promotion.Type.PERCENT).value(10).maxDiscount(500_000).minOrderValue(3_000_000)
                         .startAt(now.minus(10, ChronoUnit.DAYS)).endAt(now.plus(60, ChronoUnit.DAYS)).usageLimit(500).build(),
-                Promotion.builder().code("SINHVIEN").name("Ưu đãi sinh viên 5%").description("Giảm 5%, tối đa 1 triệu")
+                Promotion.builder().code("SINHVIEN").name("Ưu đãi sinh viên 5%").description("Giảm 5% cho sinh viên (áp dụng Laptop / MacBook, tối đa 1 triệu)")
                         .type(Promotion.Type.PERCENT).value(5).maxDiscount(1_000_000).minOrderValue(5_000_000)
+                        .studentOnly(true)
+                        .applicableCategories(new ArrayList<>(List.of("laptop")))
                         .startAt(now.minus(30, ChronoUnit.DAYS)).endAt(now.plus(120, ChronoUnit.DAYS)).build(),
+                Promotion.builder().code("IPHONE10").name("Giảm 10% dòng Điện thoại").description("Giảm 10% tối đa 1 triệu cho các mẫu điện thoại")
+                        .type(Promotion.Type.PERCENT).value(10).maxDiscount(1_000_000).minOrderValue(5_000_000)
+                        .applicableCategories(new ArrayList<>(List.of("dien-thoai")))
+                        .startAt(now.minus(10, ChronoUnit.DAYS)).endAt(now.plus(60, ChronoUnit.DAYS)).build(),
                 Promotion.builder().code("FREESHIP").name("Giảm 50.000đ").description("Cho mọi đơn từ 1 triệu")
                         .type(Promotion.Type.FIXED).value(50_000).minOrderValue(1_000_000)
                         .startAt(now.minus(5, ChronoUnit.DAYS)).endAt(now.plus(30, ChronoUnit.DAYS)).usageLimit(200).build()));

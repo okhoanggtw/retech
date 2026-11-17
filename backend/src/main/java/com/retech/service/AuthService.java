@@ -12,6 +12,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -61,5 +63,14 @@ public class AuthService {
             throw ApiException.badRequest("Mật khẩu hiện tại không đúng");
         u.setPasswordHash(encoder.encode(req.newPassword()));
         userRepo.save(u);
+    }
+
+    public User verifyStudent(String userId, StudentVerifyRequest req) {
+        User u = me(userId);
+        u.setStudentVerified(true);
+        u.setStudentId(req.studentId().trim());
+        u.setUniversity(req.university().trim());
+        u.setStudentVerifiedAt(Instant.now());
+        return userRepo.save(u);
     }
 }

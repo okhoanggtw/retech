@@ -78,6 +78,14 @@ public class CartService {
         return view(userId);
     }
 
+    public void removeItems(String userId, List<String> productIds) {
+        if (productIds == null || productIds.isEmpty()) return;
+        cartRepo.findByUserId(userId).ifPresent(c -> {
+            c.getItems().removeIf(i -> productIds.contains(i.getProductId()));
+            cartRepo.save(c);
+        });
+    }
+
     public void clear(String userId) {
         cartRepo.findByUserId(userId).ifPresent(c -> {
             c.getItems().clear();

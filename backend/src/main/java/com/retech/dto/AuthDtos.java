@@ -22,6 +22,10 @@ public final class AuthDtos {
 
     public record UpdateProfileRequest(String fullName, String phone, String address, String avatar) {}
 
+    public record StudentVerifyRequest(
+            @NotBlank(message = "Vui lòng nhập mã sinh viên") String studentId,
+            @NotBlank(message = "Vui lòng nhập tên trường đại học") String university) {}
+
     public record ChangePasswordRequest(
             @NotBlank String currentPassword,
             @NotBlank @Size(min = 6, message = "Mật khẩu tối thiểu 6 ký tự") String newPassword) {}

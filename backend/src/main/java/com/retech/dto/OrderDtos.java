@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.List;
+
 public final class OrderDtos {
     private OrderDtos() {}
 
@@ -21,10 +23,11 @@ public final class OrderDtos {
     public record CheckoutRequest(
             @Valid @NotNull ShippingRequest shipping,
             @NotNull(message = "Chọn phương thức thanh toán") PaymentMethod paymentMethod,
-            String promotionCode) {}
+            String promotionCode,
+            List<String> itemIds) {}
 
     /** Tinh truoc tong tien (trang xac nhan dat hang) */
-    public record QuoteRequest(String promotionCode) {}
+    public record QuoteRequest(String promotionCode, List<String> itemIds) {}
 
     public record Quote(long subtotal, long discount, long shippingFee, long total,
                         String promotionCode, String promotionMessage) {}

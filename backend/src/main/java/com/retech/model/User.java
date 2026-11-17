@@ -29,6 +29,13 @@ public class User {
     private Role role = Role.USER;
     @Builder.Default
     private boolean enabled = true;
+
+    // Thong tin xac minh sinh vien
+    private boolean studentVerified;
+    private String studentId;
+    private String university;
+    private Instant studentVerifiedAt;
+
     @CreatedDate
     private Instant createdAt;
 }

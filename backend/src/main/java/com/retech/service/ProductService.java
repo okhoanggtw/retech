@@ -50,9 +50,47 @@ public class ProductService {
         query.with(sortOf(p.sort()));
         int size = Math.max(1, Math.min(p.size(), 60));
         int page = Math.max(0, p.page());
-        query.skip((long) page * size).limit(size);
-        List<Product> content = mongo.find(query, Product.class);
+
+        List<Product> content;
+        if (p.q() != null && !p.q().isBlank() && (p.sort() == null || p.sort().equals("newest"))) {
+            // Uu tien lay tap ung vien va sap xep theo do lien quan cao nhat (vd go 'i' thi iPhone, iPad len dau)
+            query.skip(0).limit(Math.max(size * 4, 60));
+            List<Product> candidates = new ArrayList<>(mongo.find(query, Product.class));
+            candidates.sort(Comparator.comparingInt((Product x) -> calcRelevance(x, p.q())).reversed()
+                    .thenComparing(Product::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+            int fromIndex = Math.min(page * size, candidates.size());
+            int toIndex = Math.min(fromIndex + size, candidates.size());
+            content = new ArrayList<>(candidates.subList(fromIndex, toIndex));
+        } else {
+            query.skip((long) page * size).limit(size);
+            content = mongo.find(query, Product.class);
+        }
+
         return new PageResponse<>(content, page, size, total, (int) Math.ceil((double) total / size));
+    }
+
+    private int calcRelevance(Product prod, String rawQ) {
+        if (rawQ == null || rawQ.isBlank() || prod == null) return 0;
+        String query = TextUtil.normalize(rawQ).trim();
+        String name = TextUtil.normalize(Objects.toString(prod.getName(), ""));
+        String brand = TextUtil.normalize(Objects.toString(prod.getBrand(), ""));
+        String model = TextUtil.normalize(Objects.toString(prod.getModel(), ""));
+
+        int score = 0;
+        // 1. Ten bat dau truc tiep bang tu khoa (vd go 'i' -> 'iphone...', 'ipad...')
+        if (name.startsWith(query)) score += 1000;
+        // 2. Tu trong ten bat dau bang tu khoa (vd 'dien thoai iphone')
+        else if (name.matches("(.*\\b)" + Pattern.quote(query) + ".*")) score += 600;
+        // 3. Model bat dau bang tu khoa
+        if (model.startsWith(query)) score += 500;
+        // 4. Hang bat dau bang tu khoa
+        if (brand.startsWith(query)) score += 400;
+        // 5. Ten chua tu khoa
+        if (name.contains(query)) score += 200;
+        // 6. Model hoac hang chua tu khoa
+        if (model.contains(query) || brand.contains(query)) score += 100;
+
+        return score;
     }
 
     private Sort sortOf(String sort) {

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
+import { GraduationCap, CheckCircle2 } from "lucide-react";
 import { api, fetcher } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { ORDER_STATUS, PAYMENT_STATUS, date, vnd } from "@/lib/format";
@@ -14,15 +15,22 @@ export default function AccountPage() {
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
   const toast = useToast();
-  const [tab, setTab] = useState<"orders" | "tradeins" | "profile">("orders");
+  const [tab, setTab] = useState<"orders" | "tradeins" | "profile" | "student">("orders");
   const { data: orders } = useSWR<Order[]>(user ? "/api/orders" : null, fetcher);
   const { data: trades } = useSWR<TradeIn[]>(user ? "/api/trade-ins/mine" : null, fetcher);
   const [p, setP] = useState({ fullName: "", phone: "", address: "" });
   const [pw, setPw] = useState({ currentPassword: "", newPassword: "" });
+  const [student, setStudent] = useState({ studentId: "", university: "Học viện Công nghệ Bưu chính Viễn thông (PTIT)" });
   const [busy, setBusy] = useState(false);
+  const [busyStudent, setBusyStudent] = useState(false);
 
   useEffect(() => { if (!loading && !user) router.replace("/dang-nhap?next=/tai-khoan"); }, [loading, user, router]);
-  useEffect(() => { if (user) setP({ fullName: user.fullName, phone: user.phone ?? "", address: user.address ?? "" }); }, [user]);
+  useEffect(() => {
+    if (user) {
+      setP({ fullName: user.fullName, phone: user.phone ?? "", address: user.address ?? "" });
+      if (user.studentId) setStudent((s) => ({ ...s, studentId: user.studentId || s.studentId, university: user.university || s.university }));
+    }
+  }, [user]);
 
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true);
@@ -34,14 +42,32 @@ export default function AccountPage() {
     try { await api("/api/auth/password", { method: "PUT", json: pw }); setPw({ currentPassword: "", newPassword: "" }); toast("Đã đổi mật khẩu", "success"); }
     catch (e) { toast((e as Error).message, "error"); } finally { setBusy(false); }
   };
+  const handleVerifyStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusyStudent(true);
+    try {
+      await api("/api/auth/verify-student", { method: "POST", json: student });
+      await refresh();
+      toast("Xác minh sinh viên thành công! Mã SINHVIEN đã được kích hoạt", "success");
+    } catch (e) {
+      toast((e as Error).message, "error");
+    } finally {
+      setBusyStudent(false);
+    }
+  };
 
   if (!user) return <div className="mx-auto max-w-page p-6"><Skeleton className="h-60" /></div>;
   return (
     <>
       <PageTitle title={`Chào ${user.fullName.split(" ").pop()}.`} sub={user.email} />
       <div className="mx-auto max-w-page px-4 pb-20 md:px-6">
-        <div className="flex gap-2" role="tablist">
-          {([["orders", "Đơn hàng"], ["tradeins", "Yêu cầu thu cũ"], ["profile", "Thông tin cá nhân"]] as const).map(([k, l]) => (
+        <div className="flex flex-wrap gap-2" role="tablist">
+          {([
+            ["orders", "Đơn hàng"],
+            ["tradeins", "Yêu cầu thu cũ"],
+            ["student", user.studentVerified ? "Sinh viên (Đã xác minh) 🎓" : "Xác minh sinh viên 🎓"],
+            ["profile", "Thông tin cá nhân"],
+          ] as const).map(([k, l]) => (
             <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={`chip ${tab === k ? "chip-on" : ""}`}>{l}</button>
           ))}
         </div>
@@ -76,6 +102,65 @@ export default function AccountPage() {
                   {t.offerPrice && <p className="text-grade">Giá ReTech chốt: <b>{vnd(t.offerPrice)}</b></p>}
                 </div>
               ))}
+          </div>
+        )}
+
+        {tab === "student" && (
+          <div className="mt-6 max-w-xl">
+            {user.studentVerified ? (
+              <div className="card space-y-4 border-2 border-grade/40 bg-grade-soft/30">
+                <div className="flex items-center gap-3 text-grade">
+                  <CheckCircle2 size={28} />
+                  <div>
+                    <h2 className="text-xl font-bold">Tài khoản sinh viên đã được xác minh</h2>
+                    <p className="text-sm text-graphite">Bạn đủ điều kiện nhận các ưu đãi độc quyền dành cho học sinh, sinh viên.</p>
+                  </div>
+                </div>
+                <div className="rounded-xl bg-white p-4 space-y-2 text-sm">
+                  <p><b>Trường:</b> {user.university}</p>
+                  <p><b>Mã số sinh viên (MSSV):</b> {user.studentId}</p>
+                  <p><b>Ưu đãi áp dụng:</b> Nhập mã <span className="font-bold text-cobalt bg-cobalt-soft px-2 py-0.5 rounded">SINHVIEN</span> khi mua Laptop / MacBook để được giảm thêm <b>5% (tối đa 1.000.000đ)</b>.</p>
+                </div>
+                <Link href="/danh-muc/laptop" className="btn-primary inline-flex">
+                  Xem danh mục Laptop & MacBook →
+                </Link>
+              </div>
+            ) : (
+              <form onSubmit={handleVerifyStudent} className="card space-y-4">
+                <div className="flex items-center gap-3 text-cobalt">
+                  <GraduationCap size={28} />
+                  <div>
+                    <h2 className="text-xl font-bold">Xác minh tài khoản sinh viên</h2>
+                    <p className="text-sm text-graphite">Nhập thông tin thẻ sinh viên để mở khóa mã giảm giá <b className="text-cobalt">SINHVIEN</b>.</p>
+                  </div>
+                </div>
+                <Field label="Trường Đại học / Cao đẳng">
+                  <input
+                    className="input"
+                    required
+                    value={student.university}
+                    onChange={(e) => setStudent({ ...student, university: e.target.value })}
+                    placeholder="Ví dụ: Học viện Công nghệ Bưu chính Viễn thông"
+                  />
+                </Field>
+                <Field label="Mã số sinh viên (MSSV)">
+                  <input
+                    className="input"
+                    required
+                    value={student.studentId}
+                    onChange={(e) => setStudent({ ...student, studentId: e.target.value })}
+                    placeholder="Ví dụ: B21DCCN123"
+                  />
+                </Field>
+                <p className="text-xs text-graphite">
+                  💡 Sau khi xác minh thành công, mã <code className="font-bold text-cobalt">SINHVIEN</code> (giảm 5% cho Laptop/MacBook) sẽ có hiệu lực ngay lập tức tại bước thanh toán.
+                </p>
+                <button disabled={busyStudent} className="btn-primary">
+                  {busyStudent && <Spinner />}
+                  Xác nhận & Kích hoạt ưu đãi sinh viên
+                </button>
+              </form>
+            )}
           </div>
         )}
 

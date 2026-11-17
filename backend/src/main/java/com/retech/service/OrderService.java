@@ -7,6 +7,7 @@ import com.retech.exception.ApiException;
 import com.retech.model.*;
 import com.retech.repository.OrderRepository;
 import com.retech.repository.ProductRepository;
+import com.retech.repository.UserRepository;
 import com.retech.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class OrderService {
     private final OrderRepository orderRepo;
     private final ProductRepository productRepo;
+    private final UserRepository userRepo;
     private final CartService cartService;
     private final PromotionService promotionService;
     private final SettingsService settingsService;
@@ -35,20 +37,29 @@ public class OrderService {
             DateTimeFormatter.ofPattern("yyMMddHHmmss").withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
 
     public Quote quote(String userId, String promotionCode) {
-        CartView cart = cartService.view(userId);
-        return quote(cart, promotionCode);
+        return quote(userId, promotionCode, null);
     }
 
-    private Quote quote(CartView cart, String promotionCode) {
-        long subtotal = cart.subtotal();
-        boolean allFreeShip = !cart.items().isEmpty() && cart.items().stream().allMatch(l -> l.product().isFreeShipping());
+    public Quote quote(String userId, String promotionCode, List<String> itemIds) {
+        CartView cart = cartService.view(userId);
+        User user = userRepo.findById(userId).orElse(null);
+        return quote(cart, promotionCode, itemIds, user);
+    }
+
+    private Quote quote(CartView cart, String promotionCode, List<String> itemIds, User user) {
+        List<CartLine> lines = cart.items();
+        if (itemIds != null && !itemIds.isEmpty()) {
+            lines = lines.stream().filter(l -> itemIds.contains(l.product().getId())).toList();
+        }
+        long subtotal = lines.stream().filter(CartLine::available).mapToLong(CartLine::lineTotal).sum();
+        boolean allFreeShip = !lines.isEmpty() && lines.stream().allMatch(l -> l.product().isFreeShipping());
         long discount = 0;
         String msg = null;
         String appliedCode = null;
         if (promotionCode != null && !promotionCode.isBlank()) {
             try {
-                Promotion p = promotionService.validate(promotionCode, subtotal);
-                discount = p.calcDiscount(subtotal);
+                Promotion p = promotionService.validate(promotionCode, subtotal, lines, user);
+                discount = p.calcDiscountForItems(lines);
                 appliedCode = p.getCode();
                 msg = "Đã áp dụng: " + p.getName();
             } catch (ApiException e) {
@@ -62,15 +73,23 @@ public class OrderService {
     public Order checkout(String userId, CheckoutRequest req) {
         CartView cart = cartService.view(userId);
         if (cart.items().isEmpty()) throw ApiException.badRequest("Giỏ hàng trống");
-        for (CartLine l : cart.items()) {
+
+        List<CartLine> itemsToOrder = cart.items();
+        if (req.itemIds() != null && !req.itemIds().isEmpty()) {
+            itemsToOrder = itemsToOrder.stream().filter(l -> req.itemIds().contains(l.product().getId())).toList();
+        }
+        if (itemsToOrder.isEmpty()) throw ApiException.badRequest("Chưa chọn sản phẩm nào để thanh toán");
+
+        for (CartLine l : itemsToOrder) {
             if (!l.available()) throw ApiException.badRequest("Sản phẩm \"" + l.product().getName() + "\" không đủ hàng");
         }
-        Quote q = quote(cart, req.promotionCode());
+        User user = userRepo.findById(userId).orElse(null);
+        Quote q = quote(cart, req.promotionCode(), req.itemIds(), user);
         if (req.promotionCode() != null && !req.promotionCode().isBlank() && q.promotionCode() == null)
             throw ApiException.badRequest(q.promotionMessage());
 
         // tru kho
-        for (CartLine l : cart.items()) {
+        for (CartLine l : itemsToOrder) {
             Product p = l.product();
             p.setStock(p.getStock() - l.quantity());
             p.setSoldCount(p.getSoldCount() + l.quantity());
@@ -81,7 +100,7 @@ public class OrderService {
         Order order = Order.builder()
                 .orderCode(newOrderCode())
                 .userId(userId)
-                .items(cart.items().stream().map(l -> Order.Item.builder()
+                .items(itemsToOrder.stream().map(l -> Order.Item.builder()
                         .productId(l.product().getId())
                         .name(l.product().getName())
                         .slug(l.product().getSlug())
@@ -116,9 +135,10 @@ public class OrderService {
                 throw ApiException.badRequest("Không tạo được thanh toán PayOS, vui lòng thử lại hoặc chọn COD");
             }
         }
-        // chi xoa gio + tinh luot dung ma khi da tao don (va link thanh toan) thanh cong
+        // chi xoa cac san pham da duoc chon khoi gio hang
         if (q.promotionCode() != null) promotionService.find(q.promotionCode()).ifPresent(promotionService::markUsed);
-        cartService.clear(userId);
+        List<String> orderedProductIds = itemsToOrder.stream().map(l -> l.product().getId()).toList();
+        cartService.removeItems(userId, orderedProductIds);
         return order;
     }
 

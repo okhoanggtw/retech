@@ -41,4 +41,9 @@ public class AuthController {
         authService.changePassword(CurrentUser.id(), req);
         return Map.of("message", "Đổi mật khẩu thành công");
     }
+
+    @PostMapping("/verify-student")
+    public User verifyStudent(@Valid @RequestBody StudentVerifyRequest req) {
+        return authService.verifyStudent(CurrentUser.id(), req);
+    }
 }

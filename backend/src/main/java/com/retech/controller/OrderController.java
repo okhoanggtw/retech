@@ -1,25 +1,31 @@
 package com.retech.controller;
 
-import com.retech.dto.OrderDtos.*;
+import com.retech.dto.OrderDtos.CheckoutRequest;
+import com.retech.dto.OrderDtos.Quote;
+import com.retech.dto.OrderDtos.QuoteRequest;
 import com.retech.model.Order;
 import com.retech.security.CurrentUser;
 import com.retech.service.OrderService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     /** Tinh tong tien truoc khi dat (trang xac nhan dat hang) */
     @PostMapping("/quote")
     public Quote quote(@RequestBody(required = false) QuoteRequest req) {
-        return orderService.quote(CurrentUser.id(), req != null ? req.promotionCode() : null);
+        String promotionCode = req != null ? req.promotionCode() : null;
+        List<String> itemIds = req != null ? req.itemIds() : null;
+        return orderService.quote(CurrentUser.id(), promotionCode, itemIds);
     }
 
     @PostMapping

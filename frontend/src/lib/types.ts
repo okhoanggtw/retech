@@ -32,7 +32,9 @@ export interface BrandInfo { name: string; slug: string; productCount: number }
 
 export interface User {
   id: string; fullName: string; email: string; phone?: string; address?: string;
-  avatar?: string; role: "USER" | "ADMIN"; enabled: boolean; createdAt?: string;
+  avatar?: string; role: "USER" | "ADMIN"; enabled: boolean;
+  studentVerified?: boolean; studentId?: string; university?: string; studentVerifiedAt?: string;
+  createdAt?: string;
 }
 
 export interface CartLine { product: Product; quantity: number; lineTotal: number; available: boolean }
@@ -58,6 +60,7 @@ export interface Promotion {
   id?: string; code: string; name: string; description?: string; type: "PERCENT" | "FIXED";
   value: number; maxDiscount: number; minOrderValue: number; startAt?: string; endAt?: string;
   usageLimit: number; usedCount: number; active: boolean;
+  studentOnly?: boolean; applicableCategories?: string[]; applicableProductIds?: string[];
 }
 export interface SiteSettings {
   id?: string; storeName: string; slogan?: string; hotline?: string; email?: string; address?: string;
