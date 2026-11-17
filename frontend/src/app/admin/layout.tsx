@@ -10,7 +10,7 @@ const NAV = [
   ["/admin", "Tổng quan", LayoutDashboard], ["/admin/thong-ke", "Thống kê", BarChart3],
   ["/admin/san-pham", "Sản phẩm", Package], ["/admin/don-hang", "Đơn hàng", ShoppingCart],
   ["/admin/thu-mua", "Thu mua", Recycle], ["/admin/nguoi-dung", "Người dùng", Users],
-  ["/admin/khuyen-mai", "Khuyến mãi (Sales)", Tag], ["/admin/banner", "Banner", ImageIcon],
+  ["/admin/khuyen-mai", "Khuyến mãi (Sales)", Tag], ["/admin/banner", "Giao diện & Banner", ImageIcon],
   ["/admin/menu", "Menu", MenuIcon], ["/admin/faq", "Hỏi đáp", HelpCircle],
   ["/admin/lien-he", "Liên hệ", Mail], ["/admin/cai-dat", "Cài đặt cửa hàng", Settings],
 ] as const;

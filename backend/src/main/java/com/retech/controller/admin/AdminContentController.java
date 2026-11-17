@@ -50,6 +50,18 @@ public class AdminContentController {
     @PostMapping("/banners") public Banner createBanner(@RequestBody Banner b) { return saveNew(bannerRepo, b, x -> x.setId(null)); }
     @PutMapping("/banners/{id}") public Banner updateBanner(@PathVariable String id, @RequestBody Banner b) { return saveExisting(bannerRepo, id, b, x -> x.setId(id)); }
     @DeleteMapping("/banners/{id}") public void deleteBanner(@PathVariable String id) { bannerRepo.deleteById(id); }
+    @PutMapping("/banners/reorder")
+    public List<Banner> reorderBanners(@RequestBody List<String> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            String id = ids.get(i);
+            int order = i + 1;
+            bannerRepo.findById(id).ifPresent(b -> {
+                b.setSortOrder(order);
+                bannerRepo.save(b);
+            });
+        }
+        return bannerRepo.findAllByOrderBySortOrderAsc();
+    }
 
     // ---------- Menu ----------
     @GetMapping("/menus") public List<MenuItem> menus() { return menuRepo.findAllByOrderBySortOrderAsc(); }

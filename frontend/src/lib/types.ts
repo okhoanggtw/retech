@@ -53,7 +53,7 @@ export interface Order {
 }
 export interface Quote { subtotal: number; discount: number; shippingFee: number; total: number; promotionCode?: string; promotionMessage?: string }
 
-export interface Banner { id?: string; title: string; subtitle?: string; image?: string; ctaText?: string; link?: string; theme?: string; sortOrder: number; active: boolean }
+export interface Banner { id?: string; title: string; subtitle?: string; image?: string; ctaText?: string; link?: string; theme?: string; sortOrder: number; colSpan?: number; active: boolean }
 export interface MenuItem { id?: string; label: string; href: string; position: "HEADER" | "FOOTER"; groupName?: string; sortOrder: number; active: boolean }
 export interface Faq { id?: string; question: string; answer: string; topic?: string; sortOrder: number }
 export interface Promotion {

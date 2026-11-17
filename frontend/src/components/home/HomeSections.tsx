@@ -11,29 +11,51 @@ import { Skeleton } from "../ui";
 export function Banners() {
   const { data } = useSWR<Banner[]>("/api/content/banners", fetcher);
   if (!data) return <div className="mx-auto max-w-page px-4 py-6 md:px-6"><Skeleton className="h-[420px]" /></div>;
-  const [first, ...rest] = data;
-  if (!first) return null;
-  const Tile = ({ b, big }: { b: Banner; big?: boolean }) => {
+  if (data.length === 0) return null;
+
+  const Tile = ({ b, isFirst }: { b: Banner; isFirst: boolean }) => {
     const dark = b.theme === "dark";
+    // colSpan === 2: full 2 cot. colSpan === 1: 1 cot. Mac dinh (0 hoac null): banner dau tien la big
+    const isBig = b.colSpan === 2 || (b.colSpan !== 1 && isFirst);
     return (
-      <Link href={b.link || "/san-pham"} className={`group relative flex flex-col items-center overflow-hidden rounded-xl3 px-6 pt-12 text-center ${dark ? "bg-black text-white" : "bg-white text-ink"} ${big ? "min-h-[460px] md:col-span-2" : "min-h-[400px]"}`}>
-        <h2 className={`font-bold tracking-tightest ${big ? "text-4xl md:text-6xl" : "text-3xl md:text-4xl"}`}>{b.title}</h2>
-        {b.subtitle && <p className={`mt-3 max-w-xl text-lg ${dark ? "text-white/70" : "text-graphite"}`}>{b.subtitle}</p>}
-        {b.ctaText && <span className="mt-5 inline-flex rounded-full bg-cobalt px-5 py-2 text-sm font-semibold text-white">{b.ctaText}</span>}
+      <Link
+        href={b.link || "/san-pham"}
+        className={`group relative flex flex-col items-center overflow-hidden rounded-xl3 px-6 pt-12 text-center transition-all ${
+          dark ? "bg-black text-white" : "bg-white text-ink"
+        } ${isBig ? "min-h-[460px] md:col-span-2" : "min-h-[400px] md:col-span-1"}`}
+      >
+        <h2 className={`font-bold tracking-tightest ${isBig ? "text-4xl md:text-6xl" : "text-3xl md:text-4xl"}`}>
+          {b.title}
+        </h2>
+        {b.subtitle && (
+          <p className={`mt-3 max-w-xl text-lg ${dark ? "text-white/70" : "text-graphite"}`}>{b.subtitle}</p>
+        )}
+        {b.ctaText && (
+          <span className="mt-5 inline-flex rounded-full bg-cobalt px-5 py-2 text-sm font-semibold text-white">
+            {b.ctaText}
+          </span>
+        )}
         <div className="mt-auto w-full max-w-md translate-y-6 transition-transform duration-700 group-hover:translate-y-2">
-          {b.image
+          {b.image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={imgUrl(b.image)} alt="" className="mx-auto max-h-56 object-contain" />
-            : <DeviceArt category={/thu-cu/.test(b.link ?? "") ? "dien-thoai" : /laptop|macbook/i.test(b.link + b.title) ? "laptop" : "dien-thoai"}
-                variant={b.title} className="mx-auto h-56" />}
+            <img src={imgUrl(b.image)} alt="" className="mx-auto max-h-56 object-contain" />
+          ) : (
+            <DeviceArt
+              category={/thu-cu/.test(b.link ?? "") ? "dien-thoai" : /laptop|macbook/i.test(b.link + b.title) ? "laptop" : "dien-thoai"}
+              variant={b.title}
+              className="mx-auto h-56"
+            />
+          )}
         </div>
       </Link>
     );
   };
+
   return (
     <section className="mx-auto grid max-w-page gap-3 px-3 py-3 md:grid-cols-2 md:px-6">
-      <Tile b={first} big />
-      {rest.map((b) => <Tile key={b.id} b={b} />)}
+      {data.map((b, idx) => (
+        <Tile key={b.id || idx} b={b} isFirst={idx === 0} />
+      ))}
     </section>
   );
 }

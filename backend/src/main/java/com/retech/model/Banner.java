@@ -20,5 +20,7 @@ public class Banner {
     private String theme;      // dark | light
     private int sortOrder;
     @Builder.Default
+    private int colSpan = 0;   // 0 = tu dong, 1 = nua cot, 2 = full 2 cot
+    @Builder.Default
     private boolean active = true;
 }
