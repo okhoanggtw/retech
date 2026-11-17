@@ -25,10 +25,14 @@ public class AuthService {
         String email = req.email().trim().toLowerCase();
         if (userRepo.existsByEmailIgnoreCase(email))
             throw new ApiException(HttpStatus.CONFLICT, "Email đã được sử dụng");
+        String phone = req.phone() != null ? req.phone().replaceAll("[\\s.-]", "").trim() : "";
+        if (!phone.matches("^(0|\\+84)[0-9]{9}$")) {
+            throw ApiException.badRequest("Số điện thoại phải gồm 10 chữ số (ví dụ: 0912345678)");
+        }
         User u = User.builder()
                 .fullName(req.fullName().trim())
                 .email(email)
-                .phone(req.phone())
+                .phone(phone)
                 .passwordHash(encoder.encode(req.password()))
                 .role(Role.USER)
                 .build();

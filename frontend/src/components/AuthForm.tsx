@@ -17,17 +17,43 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true); setErr({}); setMsg("");
+    setBusy(true);
+    setErr({});
+    setMsg("");
+
+    if (mode === "register") {
+      const cleanPhone = f.phone.replace(/[\s.-]/g, "").trim();
+      const phoneRegex = /^(0|\+84)[0-9]{9}$/;
+      if (!cleanPhone) {
+        setErr({ phone: "Vui lòng nhập số điện thoại" });
+        setBusy(false);
+        return;
+      }
+      if (!phoneRegex.test(cleanPhone)) {
+        setErr({ phone: "Số điện thoại phải gồm 10 chữ số (bắt đầu bằng 0, ví dụ: 0912345678)" });
+        setBusy(false);
+        return;
+      }
+    }
+
     try {
-      const u = mode === "login" ? await login(f.email, f.password) : await register(f);
+      const cleanData = mode === "register" ? { ...f, phone: f.phone.replace(/[\s.-]/g, "").trim() } : f;
+      const u = mode === "login" ? await login(f.email, f.password) : await register(cleanData);
       const next = sp.get("next");
       router.push(next || (u.role === "ADMIN" ? "/admin" : "/"));
     } catch (e) {
       const a = e as ApiError;
-      setMsg(a.message); setErr(a.details ?? {});
-    } finally { setBusy(false); }
+      setMsg(a.message);
+      setErr(a.details ?? {});
+    } finally {
+      setBusy(false);
+    }
   };
-  const bind = (k: keyof typeof f) => ({ value: f[k], onChange: (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value }) });
+
+  const bind = (k: keyof typeof f) => ({
+    value: f[k],
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value }),
+  });
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 md:py-24">
@@ -37,7 +63,22 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         {mode === "register" && (
           <>
             <Field label="Họ và tên" error={err.fullName}><input className="input" required autoComplete="name" {...bind("fullName")} /></Field>
-            <Field label="Số điện thoại" error={err.phone}><input className="input" type="tel" autoComplete="tel" {...bind("phone")} /></Field>
+            <Field label="Số điện thoại" error={err.phone} hint="Gồm 10 chữ số (ví dụ: 0912345678)">
+              <input
+                className="input"
+                type="tel"
+                required
+                placeholder="0912345678"
+                maxLength={12}
+                autoComplete="tel"
+                value={f.phone}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9+\s]/g, "");
+                  setF({ ...f, phone: val });
+                  if (err.phone) setErr((prev) => ({ ...prev, phone: "" }));
+                }}
+              />
+            </Field>
           </>
         )}
         <Field label="Email" error={err.email}><input className="input" type="email" required autoComplete="email" {...bind("email")} /></Field>
